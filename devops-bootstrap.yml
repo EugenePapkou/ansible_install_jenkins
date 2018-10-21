@@ -1,0 +1,13 @@
+- name: Tasks on host
+  hosts: localhost
+  vars_files: 
+  - variables
+  tasks:
+    - name: Generating ssh-key
+      shell: ssh-keygen -b 2048 -t rsa -f "/home/student/ansible/day2/{{ user }}" -q -N ""
+    - name: converting the rsa ssh key to pem ssh key
+      shell: |
+        openssl rsa -in "{{ user }}" -outform pem > "{{ user }}.pem"
+        sudo chmod 600 "{{ user }}.pem"
+
+

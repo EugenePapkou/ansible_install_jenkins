@@ -1,0 +1,62 @@
+- name: get jenkins version
+  shell: /usr/bin/java -jar /opt/jenkins.war --version
+  register: jenkins_version
+  notify:
+    - save facts about jenkins
+    - Reloading facts jenkins
+- meta: flush_handlers
+
+- name: installing jenkins
+  get_url:
+    url: http://mirrors.jenkins.io/war-stable/{{ jenkins_version }}/jenkins.war
+    dest: /opt/jenkins.war
+  when: "hostvars[inventory_hostname].ansible_local.jenkins.Jenkins_version is not defined"
+
+- name: Adding group jenkins
+  group:
+    name: jenkins
+    gid: "{{ gid }}"
+    state: present
+
+- name: Adding user jenkins
+  user:
+    name: jenkins
+    uid: "{{ uid }}"
+    group: jenkins
+
+- name: creating jenkins_home folder
+  file:
+    path: /opt/jenkins/master
+    state: directory
+    owner: jenkins
+    group: jenkins
+
+- name: configuring systemd
+  template:
+    src: service.j2
+    dest: /etc/systemd/system/jenkins.service
+  notify:
+  - enable jenkins
+
+- name: systemd reload
+  systemd:
+    daemon_reload: yes
+
+- name: start jenkins
+  systemd:
+    name: jenkins
+    state: started
+
+- name: sleep for 30 seconds and continue with play
+  wait_for: timeout=30
+  delegate_to: localhost
+
+- name: init password jenkin
+  shell: cat /opt/jenkins/master/secrets/initialAdminPassword
+  changed_when: false
+  register: result
+
+- name: print init password jenkins
+  debug:
+    var: result.stdout
+

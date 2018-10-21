@@ -1,0 +1,32 @@
+- name: Adding group "{{ group }}"
+  group:
+    name: "{{ group }}"
+    gid: "{{ gid }}"
+    state: present
+
+- name: Creating a user "{{ user }}"
+  user:
+    name: "{{ user }}"
+    password: $6$5FSYq7twLrGOPHRi$qoWrHt4uDIFCmC753xsC2ysYha3JEM7OdMowK.LzWev.SbIaXmbZRxZbm./s3A6asPNOOER3aZomZtJFSvdI51
+    uid: "{{ uid }}"
+    group: "{{ group }}"
+    groups: "{{ groups2 }}"
+    home: "{{ home }}"
+    create_home : "{{ create_home  }}"
+    
+  notify:
+    - get user details
+    - save user details
+
+- name: Sending pub key
+  authorized_key:
+    user: "{{ user }}"
+    state: present
+    key: "{{ lookup('file', '{{ item }}') }}"
+  with_items: "{{ authorized_keys }}"
+
+- name: Adding to sudoers
+  template:
+    src: user.j2
+    dest: /etc/sudoers.d/{{ user }}
+

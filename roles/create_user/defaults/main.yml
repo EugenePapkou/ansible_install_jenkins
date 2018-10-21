@@ -1,0 +1,10 @@
+user: devops3
+group: devops3
+groups2: vagrant
+uid: 1122
+gid: 1004
+home: /home/devops3
+create_home: yes
+authorized_keys:
+  - '/home/student/ansible/day1/devops.pub'
+sudoers: "ALL=(ALL) NOPASSWD:ALL"

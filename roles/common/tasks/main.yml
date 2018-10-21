@@ -1,0 +1,19 @@
+- name: installing system updates
+  yum:
+    name: "{{ package }}"
+    state: present
+  loop:
+    - vim
+  loop_control:
+    loop_var: package
+  notify:
+    - gathering facts about vim
+    - save vim details
+
+- name: Ensure Facts Directory Exists
+  file:
+    path: /etc/ansible/facts.d
+    recurse: yes
+    state: directory
+  become: yes
+

@@ -1,0 +1,31 @@
+- name: 
+  hosts: webservers, appservers
+  become: yes
+  become_user: root
+  
+  pre_tasks:
+    - name: testing pre_tasks
+      debug: msg="It's a pre_task"
+
+  tasks:
+    - name: testing tasks
+      debug: msg="It's a task"
+
+  post_tasks:
+    - name: testing post_tasks
+      debug: msg="It's a post_task"
+
+  roles:
+  - common
+  - create_user
+
+- name: Installing Jenkins on appservers
+  hosts: appservers
+  become: yes
+  vars: 
+    - jenkins_version: 2.121.2  
+  roles:
+  - java
+  - jenkins
+
+

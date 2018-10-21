@@ -1,0 +1,47 @@
+- name: Java Version
+  shell: java -version 2>&1 | grep version | awk '{print $3}' | sed 's/[^0-9._]//g'
+  register: java_version
+  notify:
+    - save java details
+    - Reloading facts
+- meta: flush_handlers
+
+- name: creating directory JAVA_HOME
+  file:
+    path: /opt/oracle/java/jdk-{{ jdk_release }}/
+    state: directory
+  when: jdk_release not in hostvars[inventory_hostname].ansible_local.java.version
+
+- name: Installing java
+  unarchive:
+    src: "{{ jdk_release }}.tar.gz"
+    dest: /opt/oracle/java/jdk-{{ jdk_release }}
+    extra_opts: [--strip-components=1]
+  when: jdk_release not in hostvars[inventory_hostname].ansible_local.java.version
+  notify:
+    - save java details
+
+- name: registering java in alternatives
+  alternatives:
+    name: java
+    link: /usr/bin/java
+    path: /opt/oracle/java/jdk-{{ jdk_release }}/bin/java
+
+- name: registering javac in alternatives
+  alternatives:
+    name: javac
+    link: /usr/bin/javac
+    path: /opt/oracle/java/jdk-{{ jdk_release }}/bin/javac
+
+- name: registering jar in alternatives
+  alternatives:
+    name: jar
+    link: /usr/bin/jar
+    path: /opt/oracle/java/jdk-{{ jdk_release }}/bin/jar
+
+- name: verifying installed version of java
+  shell: java -version 2>&1 | grep version | awk '{print $3}' | sed 's/[^0-9._]//g'
+  register: output
+  changed_when: False
+  failed_when: jdk_release not in output.stdout
+

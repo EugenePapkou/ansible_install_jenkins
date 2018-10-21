@@ -1,0 +1,19 @@
+- name: save facts about jenkins
+  copy: 
+    content: >
+      {
+        "Jenkins_version": "{{ jenkins_version.stdout }}",
+        "installed": "{{ ansible_date_time.iso8601 }}"
+      }
+    dest: /etc/ansible/facts.d/jenkins.fact
+  become: yes
+
+- name: Reloading facts jenkins
+  setup:
+    filter: ansible_local
+
+- name: enable jenkins
+  systemd:
+    name: jenkins
+    enabled: true
+

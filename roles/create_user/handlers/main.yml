@@ -1,0 +1,14 @@
+- name: get user details
+  shell: cat /etc/passwd | grep {{ user }}
+  register: user_details
+  changed_when: false
+
+- name: save user details
+  copy: 
+    content: >
+      {
+        "User details": "{{ user_details.stdout }}"
+      }
+    dest: /etc/ansible/facts.d/user.fact
+  become: yes
+
